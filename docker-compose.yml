@@ -1,0 +1,27 @@
+version: '2.3'
+
+services:
+  es:
+    container_name: elasticsearch
+    build:
+      context: ./elasticsearch
+      dockerfile: Dockerfile
+    networks:
+      - testnetwork
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent http://localhost:9200/test_index/_stats/docs || exit 1"]
+      interval: 10s
+      timeout: 1s
+      retries: 6
+  app:
+    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    networks:
+      - testnetwork
+    depends_on:
+      es:
+        condition: service_healthy
+networks:
+  testnetwork:
